@@ -9,6 +9,7 @@
 
 ## Introduction
 
+Referenced Resource - https://www.youtube.com/playlist?list=PL4Rj_WH6yLgWe7TxankiqkrkVKXIwOP42
 A simple crowdfunding contract with the following features :-
 
 - A min contribution amount in USD ( By using Chainlink orcales )
