@@ -1,11 +1,10 @@
-# What's It About ?
+# Basics
 
-Welcome to the Solidity Basics directory! Here, I have curated a handful of applications in Solidity that I found essential to practice or to experiment with.
-Almost all the code is just practice of the below provided resource.
+Welcome to the Solidity Applications directory!
+
+Here, I have curated a handful of applications in Solidity that I found essential to practice or to experiment with.
 All the codes above were practiced on Remix IDE.
 
-## Resources Referenced
+## Learnings + References
 
-**Note For Self** - Resources will be marked as optional which I feel can be skipped for revising. Unmarked resources should be considered as mandatory.
-
-1. https://solidity-by-example.org/ - The Application Section
+1. https://solidity-by-example.org/ - The Applications Section
