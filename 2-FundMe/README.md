@@ -5,7 +5,7 @@
 - [Introduction](#introduction)
 - [Project Purpose](#project-purpose)
 - [Requirements](#requirements)
-- [Learnings + Resources](#learning-+-resources)
+- [Learnings + Resources](#learning--resources)
 
 ## Introduction
 
@@ -27,13 +27,18 @@ A simple crowdfunding contract with the following features :-
 
 ## Learnings + Resources
 
+- Solidity Best Practices Guide - https://github.com/smartcontractkit/chainlink/blob/develop/contracts/STYLE.md
+
 - Installing dependencies in Foundry and remappings- https://book.getfoundry.sh/projects/dependencies
+
 - Loading env variables to shell ( this is related to shell and not solidity or foundry )
+
   ```shell
   # After making changes in .env
   source .env
   echo $PRIVATE_KEY
   ```
+
 - Deploying Contracts
 
   - Using forge create - https://book.getfoundry.sh/forge/deploying
@@ -43,21 +48,13 @@ A simple crowdfunding contract with the following features :-
       source .env
       # Start anvil
       anvil
+      # Do this in a new terminal
       # Deploy Contract and boradcast
       # We can also verify the contract using --verify flag in this command
       # Also we can change the rpc url to Sepolia to mainnet to deploy it to that env
-      # We can skip private key if we r just deploying to anvil
-      forge script script/DeployMyWallet.s.sol --rpc-url $LOCAL_RPC_URL --private-key $PRIVATE_KEY --broadcast
+      # We can skip private key if we r just deploying to anvil or take priv key from anvil terminal
+      forge script script/DeployFundMe.s.sol --rpc-url $LOCAL_RPC_URL --private-key $PRIVATE_KEY --broadcast
     ```
-
-- Solidity Learnings
-
-  - Naming conventions for constant, immutable, storage types and code structuring
-  - Usage of receive and fallback
-  - Using constants wherever possible - Gas Opt. as they r stored in bytecode
-  - Using immutable if constant is not possible - Gas Opt. as they r stored in bytecode ( Some Gas is used to initialize it while deployment )
-  - Using Custom Errors - Using this instead of require with strings saves Gas
-  - Using private for storage members and using getters for them instead - Gas Opt.
 
 - Wrting Tests in Foundry
 
@@ -90,6 +87,7 @@ A simple crowdfunding contract with the following features :-
     ```
 
 - Brief intro to chisel - https://book.getfoundry.sh/reference/chisel/
+
 - To check how much fee our test functions are using - https://book.getfoundry.sh/reference/forge/forge-snapshot?highlight=snapshot#forge-snapshot
   ```shell
   gas snapshot
