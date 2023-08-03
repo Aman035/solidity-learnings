@@ -5,7 +5,7 @@
 - [Introduction](#introduction)
 - [Project Purpose](#project-purpose)
 - [Requirements](#requirements)
-- [Learnings + Resources](#learning--resources)
+- [Learnings + Resources](#learnings--resources)
 
 ## Introduction
 
