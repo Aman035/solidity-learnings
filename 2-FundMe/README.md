@@ -1,12 +1,31 @@
 # FundeMe
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Project Purpose](#project-purpose)
+- [Requirements](#requirements)
+- [Learnings + Resources](#learning-+-resources)
+
+## Introduction
+
 A simple crowdfunding contract with the following features :-
 
 - A min contribution amount in USD ( By using Chainlink orcales )
-- Withdaw fn by Contract Owner
-- Handling cases when someone tries to send Eth to contract
+- Owner can withdraw all the funds
 
-## Learnings From This Project
+## Project Purpose
+
+- Setup and Learn Foundry Functionalities
+- Best Practices for writing Tests
+- Some Solidity Optimizations
+
+## Requirements
+
+- Git
+- Foundry
+
+## Learnings + Resources
 
 - Installing dependencies in Foundry and remappings- https://book.getfoundry.sh/projects/dependencies
 - Loading env variables to shell ( this is related to shell and not solidity or foundry )
