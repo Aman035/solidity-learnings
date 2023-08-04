@@ -58,7 +58,7 @@ contract FundMe {
     //  /        \
     //receive()  fallback()
 
-    // Handles the case when someone accidently sends eth to contract 
+    // Handles the case when someone accidently sends eth to contract
     receive() external payable {
         fund();
     }
@@ -98,7 +98,26 @@ contract FundMe {
         require(callSuccess, "Call failed"); // custom error can be used here
     }
 
-    /** Getter Functions */
+    // Gas Optimized
+    // Using unchecked as we know it will never overflow
+    // Less reads from storage
+    function cheaperWithdraw() public onlyOwner {
+        uint256 fundersLength = s_funders.length;
+        for (uint256 funderIndex = 0; funderIndex < fundersLength;) {
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
+            unchecked {
+                ++funderIndex;
+            }
+        }
+        s_funders = new address[](0);
+        (bool callSuccess,) = payable(msg.sender).call{value: address(this).balance}("");
+        require(callSuccess, "Call failed");
+    }
+
+    /**
+     * Getter Functions
+     */
 
     /**
      * @notice Gets the amount that an address has funded

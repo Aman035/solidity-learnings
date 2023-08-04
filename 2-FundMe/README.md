@@ -1,5 +1,7 @@
 # FundeMe
 
+[Resource Referenced](https://www.youtube.com/playlist?list=PL4Rj_WH6yLgWe7TxankiqkrkVKXIwOP42)
+
 ## Table of Contents
 
 - [Introduction](#introduction)
@@ -8,8 +10,6 @@
 - [Learnings + Resources](#learnings--resources)
 
 ## Introduction
-
-Referenced Resource - https://www.youtube.com/playlist?list=PL4Rj_WH6yLgWe7TxankiqkrkVKXIwOP42
 
 A simple crowdfunding contract with the following features :-
 
@@ -24,73 +24,90 @@ A simple crowdfunding contract with the following features :-
 
 ## Requirements
 
-- Git
-- Foundry
+- `Git`
+- `Foundry`
+- `jq` ( Requirement for [Foundry DevOps](https://github.com/Cyfrin/foundry-devops) )
+- `make` ( Optional )
 
 ## Learnings + Resources
 
-- Solidity Best Practices Guide - https://github.com/smartcontractkit/chainlink/blob/develop/contracts/STYLE.md
+#### Solidity Best Practices
 
-- Installing dependencies in Foundry and remappings- https://book.getfoundry.sh/projects/dependencies
+- [Chainlink Style Guide](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/STYLE.md)
 
-- Loading env variables to shell ( this is related to shell and not solidity or foundry )
+- Custom errors are generally named as `ContractName\_\_Error()`
 
-  ```shell
-  # After making changes in .env
-  source .env
-  echo $PRIVATE_KEY
-  ```
+- [NatSpec Comments](https://blockchainknowledge.in/guide-to-comments-in-solidity-including-natspec-format/)
 
-- Deploying Contracts
+#### Foundry Related
 
-  - Using forge create - https://book.getfoundry.sh/forge/deploying
-  - Using Deployment Script
+- [Installing Dependencies & Creating Remappings](https://book.getfoundry.sh/projects/dependencies)
+
+- Foundry allows to write scripts in solidity itself which can be used for various use cases - such as Deployment etc.
+- **Contract Deployment**
+
+  - [Using forge create](https://book.getfoundry.sh/forge/deploying) - Most basic way of deployment
+  - Using Deployment Script - Better And Clean Way of Deployment
+
     ```shell
-      # Load env vars to shell
-      source .env
+    # Load env vars to shell
+    source .env
+    # To check if vars are loaded correctly
+    echo $PRIVATE_KEY
+    ```
+
+    ```shell
+      # ANVIL | LOCAL DEPLOYMENT
+
       # Start anvil
       anvil
-      # Do this in a new terminal
-      # Deploy Contract and boradcast
-      # We can also verify the contract using --verify flag in this command
-      # Also we can change the rpc url to Sepolia to mainnet to deploy it to that env
-      # We can skip private key if we r just deploying to anvil or take priv key from anvil terminal
-      forge script script/DeployFundMe.s.sol --rpc-url $LOCAL_RPC_URL --private-key $PRIVATE_KEY --broadcast
+      # ANVIL_PRC_URL & PRIVATE_KEY can be obtained from anvil terminal
+      # Broadcast flag will create all contract details in .broadcast directory
+      forge script script/DeployFundMe.s.sol --rpc-url $ANVIL_RPC_URL --private-key $PRIVATE_KEY --broadcast
     ```
 
-- Wrting Tests in Foundry
+    ```shell
+      # REAL ENV DEPLOYMENT
 
-  - https://book.getfoundry.sh/forge/tests
-  - Different Test Command Params - https://book.getfoundry.sh/reference/forge/forge-test
+      # Take rpc url from alchemy or quicknode
+      # Use any metamask acc priv key
+      # Verify flag with etherscan api key can verify contract at the time of deployment programatically
+      forge script script/DeployFundMe.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+    ```
+
+- **Tests in Foundry**
+
+  - [Writing Tests as solidity contracts](https://book.getfoundry.sh/forge/tests)
+  - [Different Test Command Params](https://book.getfoundry.sh/reference/forge/forge-test)
   - Types of Testing
-    1. Unit: Testing a single function
-    2. Integration: Testing multiple functions
-    3. Forked: Testing on a forked network
-    4. Staging: Testing on a live network (testnet or mainnet)
-  - Refactor - Using Deployment Script for Contract Deployment and using this script for test cases
+    1. **Unit**: Testing a single function
+    2. **Integration**: Testing multiple functions
+    3. **Forked**: Testing on a forked network
+    4. **Staging**: Testing on a live network (testnet or mainnet)
+  - **Refactor** - Using Deployment Script in test cases.
   - Executing tests with fork env ( simulatues to the given rpc url ie mainly reads data from the blockchain environment ). This is very useful since contracts can use other contracts which are deployed to specific env and would fail for local anvil chain testing
-    ```
+    ```shell
     forge test --rpc-url $SEPOLIA_RPC_URL
     ```
-  - Testing contracts on diff forks using HelperConfig scripts and mocking contracts on Anvil ( local ) chain which enables running tests and coverage on Anvil itself
+  - **Refactor** - Testing contracts on diff forks using HelperConfig scripts and mocking contracts on Anvil ( local ) chain which enables running tests and coverage on Anvil itself
   - Running only a specific test
     ```shell
     # Just do forge test --help to see all options
     forge test --mt test_FundUpdatesFundedDataStructure
     ```
 
-- Forge Coverage - For checking out test coverage of code
+- [Forge Coverage](https://www.rareskills.io/post/foundry-testing-solidity) - Checking Test Coverage of Code
 
-  - https://www.rareskills.io/post/foundry-testing-solidity
-    ```shell
-    forge coverage
-    # Tesing on a specific fork
-    forge coverage --rpc-url $SEPOLIA_URL
-    ```
+  ```shell
+  forge coverage
+  # Tesing on a specific fork
+  forge coverage --rpc-url $SEPOLIA_URL
+  ```
 
-- Brief intro to chisel - https://book.getfoundry.sh/reference/chisel/
+- [Brief Intro to Chisel](https://book.getfoundry.sh/reference/chisel/)
 
-- To check how much fee our test functions are using - https://book.getfoundry.sh/reference/forge/forge-snapshot?highlight=snapshot#forge-snapshot
+- [Checking Gas Usage By Test Fns](https://book.getfoundry.sh/reference/forge/forge-snapshot?highlight=snapshot#forge-snapshot)
   ```shell
   gas snapshot
   ```
+- Gas Usage On Anvil

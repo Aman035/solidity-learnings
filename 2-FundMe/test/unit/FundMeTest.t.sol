@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {FundMe} from "../src/FundMe.sol";
-import {Test, console} from "../lib/forge-std/src/Test.sol";
-import {DeployFundMe} from "../script/DeployFundMe.s.sol";
+import {FundMe} from "../../src/FundMe.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
 /*
     In Foundry tests are written in solidity itself rather than using any Js / Ts Test Framework
     - For printing logs using verbosity Level 2
@@ -15,8 +15,8 @@ contract FundMeTest is Test {
     // cheatcode - creates address from the given label
     // https://book.getfoundry.sh/reference/forge-std/make-addr?highlight=MAKEADDR#makeaddr
     address USER = makeAddr("user");
-    uint constant SEND_VALUE = 0.1 ether; // 1e17
-    uint constant STARTING_BALANCE = 100 ether;
+    uint256 constant SEND_VALUE = 0.1 ether; // 1e17
+    uint256 constant STARTING_BALANCE = 100 ether;
 
     // Special FN - Runs before each test
     function setUp() external {
@@ -116,6 +116,28 @@ contract FundMeTest is Test {
 
         vm.startPrank(fundMe.getOwner());
         fundMe.withdraw();
+        vm.stopPrank();
+
+        assert(address(fundMe).balance == 0);
+        assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwner().balance);
+        assert((numberOfFunders + 1) * SEND_VALUE == fundMe.getOwner().balance - startingOwnerBalance);
+    }
+
+    function test_CheapWithDrawFromMultipleFunders() public funded {
+        uint160 numberOfFunders = 10;
+        uint160 startingFunderIndex = 2;
+        for (uint160 i = startingFunderIndex; i < numberOfFunders + startingFunderIndex; i++) {
+            // we get hoax from stdcheats - prank + deal
+            // address(i) - creates address from uint160
+            hoax(address(i), STARTING_BALANCE);
+            fundMe.fund{value: SEND_VALUE}();
+        }
+
+        uint256 startingFundMeBalance = address(fundMe).balance;
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+
+        vm.startPrank(fundMe.getOwner());
+        fundMe.cheaperWithdraw();
         vm.stopPrank();
 
         assert(address(fundMe).balance == 0);
