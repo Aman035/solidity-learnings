@@ -35,7 +35,7 @@ A simple crowdfunding contract with the following features :-
 
 - [Chainlink Style Guide](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/STYLE.md)
 
-- Custom errors are generally named as `ContractName\_\_Error()`
+- Custom errors are generally named as `ContractName__Error()`
 
 - [NatSpec Comments](https://blockchainknowledge.in/guide-to-comments-in-solidity-including-natspec-format/)
 
@@ -110,4 +110,25 @@ A simple crowdfunding contract with the following features :-
   ```shell
   gas snapshot
   ```
-- Gas Usage On Anvil
+- Code Formating
+  ```shell
+  forge fmt
+  ```
+- Gas Price on Anvil is 0 but this can also be changed for testing - This is the reason one can perform mathematical operations on balance checks before and after tx ignoring gas costs
+
+  ```shell
+  // vm.txGasPrice(GAS_PRICE); // set price
+  // uint256 gasStart = gasleft();
+  // // Act
+  vm.startPrank(fundMe.getOwner());
+  fundMe.withdraw();
+  vm.stopPrank();
+
+  // uint256 gasEnd = gasleft();
+  // uint256 gasUsed = (gasStart - gasEnd) * tx.gasprice;
+  ```
+
+#### Gas Optimization
+
+- Using Constant & Immutable
+- Less Read and write to storage varaibles - This takes more gas as compared to memory. Check out gas usage by `SLOAD` `SSTORE` [here](https://www.evm.codes/?fork=shanghai)
