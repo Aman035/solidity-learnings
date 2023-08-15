@@ -1,3 +1,6 @@
 [submodule "3-lottery/lib/forge-std"]
 	path = 3-lottery/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "3-lottery/lib/chainlink-brownie-contracts"]
+	path = 3-lottery/lib/chainlink-brownie-contracts
+	url = https://github.com/smartcontractkit/chainlink-brownie-contracts
