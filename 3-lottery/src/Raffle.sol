@@ -4,16 +4,20 @@ pragma solidity ^0.8.19;
 
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol";
 
-/// @title Sample Raffle Contract
-/// @author Aman
-/// @notice This contract implements a sample raffle
-/// @dev Implements chainlink VRFv2
-contract Raffle is VRFConsumerBaseV2 {
+/**
+ * @title Raffle Contract
+ * @author Aman
+ * @notice This contract implements a sample raffle
+ * @dev Implements chainlink VRFv2 & chainlink automation
+ */
+contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     /* Errors */
     error Raffle__NotEnoughETHSent();
     error Raffle__TransactionFailed();
     error Raffle__NotOpen();
+    error Raffle__UpkeepNotNeeded(uint256 balance, uint256 playersLength, uint256 raffleState);
 
     /* Interfaces */
     VRFCoordinatorV2Interface private i_vrfCoorditnator;
@@ -72,27 +76,57 @@ contract Raffle is VRFConsumerBaseV2 {
         emit EnteredRaffle(msg.sender);
     }
 
-    function pickWinner() external {
-        if (block.timestamp - s_lastTimeStamp < i_interval) {
-            revert();
+    /**
+     * @dev This function is called by the Chainlink Automation Node and check if conditions are meet to pick a winner
+     * 1. Time Passed is greater than interval
+     * 2. Raffle is OPEN
+     * 3. Raffle has ETH
+     * 4. Raffle has Players
+     */
+    function checkUpkeep(bytes memory /* checkData */ )
+        public
+        view
+        override
+        returns (bool upkeepNeeded, bytes memory /* performData */ )
+    {
+        bool timePassed = (block.timestamp - s_lastTimeStamp) >= i_interval;
+        bool raffleIsOpen = s_raffleState == RaffleState.OPEN;
+        bool raffleHasETH = address(this).balance > 0;
+        bool raffleHasPlayers = s_players.length > 0;
+        upkeepNeeded = timePassed && raffleIsOpen && raffleHasETH && raffleHasPlayers;
+        return (upkeepNeeded, ""); // Returning empty bytes
+    }
+
+    /**
+     * @dev This function is called by the Chainlink Automation Node and chooses the winner of Raffle
+     */
+    function performUpkeep(bytes calldata /* performData */ ) external override {
+        (bool upkeepNeeded,) = checkUpkeep("");
+        if (!upkeepNeeded) {
+            revert Raffle__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_raffleState));
         }
         s_raffleState = RaffleState.CALCULATING_WINNER;
-        uint256 requestId = i_vrfCoorditnator.requestRandomWords(
+        i_vrfCoorditnator.requestRandomWords(
             i_gasLane, i_subscriptionId, REQUEST_CONFIRMATIONS, i_callbackGasLimit, NUM_WORDS
         );
     }
 
-    // CEI - Checks-Effects-Interactions
-    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
-        // Checks ( using require() ) ( None Here )
-        // Effects - Affect our own contract state
+    /**
+     * @notice Using CEI Design Pattern (Checks-Effects-Interactions)
+     * 1. Checks - Using require() and conditional reverts, helps in gas optimized state reverts
+     * 2. Effects - Affect our own contract state
+     * 3. Interactions - Interact with other contracts
+     */
+    function fulfillRandomWords(uint256, /* requestId */ uint256[] memory randomWords) internal override {
+        // Checks
+        // Effects
         address payable winner = s_players[randomWords[0] % s_players.length];
         s_recentWinner = winner;
         s_players = new address payable[](0);
         s_lastTimeStamp = block.timestamp;
         s_raffleState = RaffleState.OPEN;
         emit PickedWinner(winner);
-        // Interactions - Interact with other contracts
+        // Interactions
         (bool success,) = winner.call{value: address(this).balance}("");
         if (!success) {
             revert Raffle__TransactionFailed();

@@ -63,4 +63,34 @@ A Raffle Contract with the following features :-
   - Generating a pure random no. inside a Smart contract is not possible and can be manipulated by the miner.
   - Chainlink overcomes the above issue and enables to verify this randomness thus enabling any temper of info.
 - [Intro, Security Considerations, Best Practices, Implementation](https://docs.chain.link/vrf/v2/introduction)
-- Reason for chossing Subscription Method - Seems more scalable
+- Reason for choosing Subscription Method - Seems more scalable
+- VRF is a 2 trx fn rather than being executed in a single trx.
+
+#### ChainLink Automation
+
+- Used for calling contract function after a certain interval or on having some custom condition meet.
+
+#### Raffle Contract Overview
+
+- Errors can have different params which help to debug issue easily.
+  ```
+  error Raffle__UpkeepNotNeeded(uint256 balance, uint256 playersLength, uint256 raffleState);
+  ```
+- Use of `VRFConsumerBaseV2` Interface - To make sure we are using a chainLink compatible `fulfillRandomWords` fn.
+- use of `AutomationCompatibleInterface` Interface - To make sure we are using compatible `checkUpkeep` and `performUpkeep` fn.
+- Use of `VRFCoordinatorV2Interface`- To make sure conract has access to all the fn provided by the vrfCoordinator contract.
+- Events has indexed param thus enabling filtered fetching of event logs using those params.
+  ```
+  event PickedWinner(address indexed winner);
+  ```
+- `checkUpkeep` is kept as public rather than external ( as mentioned in docs ) since we are also calling it in the `performUpKeep` fn from the contract itself.
+- `checkUpkeep` checkData is changed to memory from callData ( as mentioned in docs ) since we are calling it also internally from contract.
+- Fn input params and return params can be marked as commented to avoid warnings and tell compiler we are not going to use it.
+  ```
+  function checkUpkeep(bytes memory /* checkData */ )
+        public
+        view
+        override
+        returns (bool upkeepNeeded, bytes memory /* performData */ )
+  ```
+- `fulfillRandomWords` is kept as internal and is called by `requestRandomWords` as a callback fn
