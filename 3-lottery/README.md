@@ -53,7 +53,7 @@ A Raffle Contract with the following features :-
 - Events are usually emited out whenever there are changes to storage variables and are a cheap way of logging data.
 - At max 3 params can be indexed ( indexed params are easy to query and bloom filters can be applied to them )
 
-#### Check Effect Implementation Design Pattern
+#### Check Effect Interaction Design Pattern
 
 - [CEI Design Pattern](https://fravoll.github.io/solidity-patterns/checks_effects_interactions.html)
 
@@ -94,3 +94,11 @@ A Raffle Contract with the following features :-
         returns (bool upkeepNeeded, bytes memory /* performData */ )
   ```
 - `fulfillRandomWords` is kept as internal and is called by `requestRandomWords` as a callback fn
+
+#### Tests OverView
+
+- Mostly Test follows the structure of
+  - Arrange
+  - Act
+  - Asset
+- [Foundry Cheatcodes](https://book.getfoundry.sh/cheatcodes/) can be very useful for tests and help to test various conditions
