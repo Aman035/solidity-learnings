@@ -4,3 +4,9 @@
 [submodule "3-lottery/lib/chainlink-brownie-contracts"]
 	path = 3-lottery/lib/chainlink-brownie-contracts
 	url = https://github.com/smartcontractkit/chainlink-brownie-contracts
+[submodule "3-lottery/lib/solmate"]
+	path = 3-lottery/lib/solmate
+	url = https://github.com/transmissions11/solmate
+[submodule "3-lottery/lib/foundry-devops"]
+	path = 3-lottery/lib/foundry-devops
+	url = https://github.com/Cyfrin/foundry-devops

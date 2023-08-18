@@ -15,7 +15,6 @@ contract RaffleTest is Test {
     event EnteredRaffle(address indexed player);
     event PickedWinner(address indexed winner);
 
-
     Raffle raffle;
     HelperConfig helperConfig;
     address PLAYER = makeAddr("player"); // cheatcode - creates address from the given label
@@ -58,9 +57,9 @@ contract RaffleTest is Test {
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
     }
 
-    /**
-     * enterRaffle() TESTS
-     */
+    ////////////////////
+    // enterRaffle()  //
+    ////////////////////
     function test_RaffleRevertOnNotEnoughEntranceFee() public {
         // Arrange
         vm.prank(PLAYER);
@@ -69,20 +68,17 @@ contract RaffleTest is Test {
         raffle.enterRaffle();
     }
 
-    // function test_RaffleRevertOnEnteringWhileCalcululatingWinner() public {
-    //     // Arrange
-    //     vm.startPrank(PLAYER);
-    //     raffle.enterRaffle{value: entranceFee}();
-    //     vm.warp(block.timestamp + interval); // cheatCode - Sets the time of blockchain to the given timestamp
-    //     raffle.performUpkeep("");
-    //     vm.stopPrank();
+    function test_RaffleRevertOnEnteringWhileCalcululatingWinner() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval); // cheatCode - Sets the time of blockchain to the given timestamp
+        raffle.performUpkeep("");
+        // Act / Assert
+        vm.expectRevert(Raffle.Raffle__NotOpen.selector);
+        raffle.enterRaffle{value: entranceFee}();
 
-    //     // Act / Assert
-    //     vm.expectRevert(Raffle.Raffle__NotOpen.selector);
-    //     raffle.enterRaffle{value: entranceFee}();
-    //     vm.stopPrank();
-
-    // }
+    }
 
     function test_RaffleRecordsPlayerOnEntrance() public {
         // Arrange
@@ -115,4 +111,7 @@ contract RaffleTest is Test {
         raffle.enterRaffle{value: entranceFee}();
     }
 
+    ////////////////////
+    // checkUpkeep()  //
+    ////////////////////
 }

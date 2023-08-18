@@ -101,4 +101,13 @@ A Raffle Contract with the following features :-
   - Arrange
   - Act
   - Asset
-- [Foundry Cheatcodes](https://book.getfoundry.sh/cheatcodes/) can be very useful for tests and help to test various conditions
+- [Foundry Cheatcodes](https://book.getfoundry.sh/cheatcodes/) can be very useful for tests and help to test various conditions as depicted in test files.
+
+#### Deploy Scripts Overview
+
+- Raffle Contract deployed using HelperConfig for defining config for diff chains
+- For local testing Mock VRFCoordinatorV2 needs to be deployed
+- For using VRFCoordinatorV2 in Raffle Contract
+  1. A subscription should be created.
+  2. Subscription should be funded using LINK Token - for local one needs to deploy a mock LINK Token
+  3. Raffle Contract should be added as a consumer to VRFCoordinatorV2
