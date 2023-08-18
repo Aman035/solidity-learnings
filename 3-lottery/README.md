@@ -110,4 +110,4 @@ A Raffle Contract with the following features :-
 - For using VRFCoordinatorV2 in Raffle Contract
   1. A subscription should be created.
   2. Subscription should be funded using LINK Token - for local one needs to deploy a mock LINK Token
-  3. Raffle Contract should be added as a consumer to VRFCoordinatorV2
+  3. Raffle Contract should be added as a consumer to VRFCoordinatorV2 - foundry-devops is used for getting the latest deployed Raffle contract so that it can be added as consumer. ( For this ffi should be true in foundry.toml )

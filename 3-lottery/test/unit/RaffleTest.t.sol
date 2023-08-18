@@ -73,6 +73,7 @@ contract RaffleTest is Test {
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
         vm.warp(block.timestamp + interval); // cheatCode - Sets the time of blockchain to the given timestamp
+        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
         raffle.performUpkeep("");
         // Act / Assert
         vm.expectRevert(Raffle.Raffle__NotOpen.selector);
@@ -114,4 +115,96 @@ contract RaffleTest is Test {
     ////////////////////
     // checkUpkeep()  //
     ////////////////////
+    function test_RaffleUpkeepFalseOn0Players() public {
+        // Arrange - Make everything true other than players
+        vm.warp(block.timestamp + interval); // cheatCode - Sets the time of blockchain to the given timestamp
+        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
+        // Act
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
+        // Assert
+        assert(!upkeepNeeded);
+    }
+
+    function test_RaffleUpkeepFalseOn0Eth() public {
+        // Arrange - Make everything true other than ETH balance
+        vm.warp(block.timestamp + interval); // cheatCode - Sets the time of blockchain to the given timestamp
+        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
+        // Act
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
+        // Assert
+        assert(!upkeepNeeded);
+    }
+
+    function test_RaffleUpkeepFalseBeforeInterval() public {
+        // Arrange - Make everything true other than Lottery Interval time
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        // Act
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
+        // Assert
+        assert(!upkeepNeeded);
+    }
+
+    function test_RaffleUpkeepFalseOnCalculatingState() public {
+        // Arrange - Make everything true other than Lottery Interval time
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1); // cheatCode - Sets the time of blockchain to the given timestamp
+        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
+        raffle.performUpkeep(""); // cheatCode - Calls the checkUpkeep() fn on the given contract
+        Raffle.RaffleState raffleState = raffle.getRaffleState();
+        // Act
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
+        // Assert
+        assert(!upkeepNeeded);
+        assert(raffleState == Raffle.RaffleState.CALCULATING_WINNER);
+    }
+
+    function test_RaffleUpkeepTrueOnAllConditionsMet() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1); // cheatCode - Sets the time of blockchain to the given timestamp
+        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
+        // Act
+        (bool upkeepNeeded,) = raffle.checkUpkeep("");
+        // Assert
+        assert(upkeepNeeded);
+    }
+
+    ////////////////////
+    // checkUpkeep()  //
+    ////////////////////
+    function test_RafflePerformUpkeepRevertOnCheckUpkeepFalse() public {
+        // Arrange
+        uint256 currentBalance = 0;
+        uint256 numPlayers = 0;
+        Raffle.RaffleState rState = raffle.getRaffleState();
+        // Act / Assert
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Raffle.Raffle__UpkeepNotNeeded.selector,
+                currentBalance,
+                numPlayers,
+                rState
+            )
+        );
+        raffle.performUpkeep("");
+    }
+
+    function test_RafflePerformUpkeepWorksOnCheckUpkeepTrue() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1); // cheatCode - Sets the time of blockchain to the given timestamp
+        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
+        // Act
+        raffle.performUpkeep("");
+        // Assert
+        assert(raffle.getRaffleState() == Raffle.RaffleState.CALCULATING_WINNER);
+    }
+
+
+
+
 }
