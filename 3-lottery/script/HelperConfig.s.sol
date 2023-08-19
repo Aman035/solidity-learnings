@@ -39,6 +39,14 @@ contract HelperConfig is Script {
         }
     }
 
+    /**
+     * Iniitally subscriptionId is 0 and is updated by the DeployRaffle script
+     * @param subscriptionId - updated subscriptionId
+     */
+    function updateSubscriptionId(uint64 subscriptionId) public {
+        s_activeNetworkConfig.subscriptionId = subscriptionId;
+    }
+
     function getSepoliaEthConfig() public view returns (NetworkConfig memory sepoliaNetworkConfig) {
         // Taken From - https://docs.chain.link/vrf/v2/subscription/supported-networks
         sepoliaNetworkConfig = NetworkConfig({

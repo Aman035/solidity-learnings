@@ -102,6 +102,7 @@ A Raffle Contract with the following features :-
   - Act
   - Asset
 - [Foundry Cheatcodes](https://book.getfoundry.sh/cheatcodes/) can be very useful for tests and help to test various conditions as depicted in test files.
+- Checkout `test_RafflePerformUpkeepUpdatesStateAndEmitEventOnCheckUpkeepTrue` as it focuses on detailed analysis and testing of an event.
 
 #### Deploy Scripts Overview
 

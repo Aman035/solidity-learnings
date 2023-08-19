@@ -26,8 +26,9 @@ contract DeployRaffle is Script {
         if (subscriptionId == 0) {
             CreateSubscription createSubscription = new CreateSubscription();
             subscriptionId = createSubscription.createSubscription(vrfCoordinatorV2, deployerKey);
+            helperConfig.updateSubscriptionId(subscriptionId);
 
-             /**
+            /**
              * 2. Fund Subscription if not already funded
              * Since it is a 1 time deploy, assuming if a subscription is created, it is funded
              */

@@ -6,7 +6,7 @@ import {HelperConfig} from "./HelperConfig.s.sol";
 import {VRFCoordinatorV2Mock} from "../test/mocks/VRFCoordinatorV2Mock.sol";
 import {LinkToken} from "../test/mocks/LinkTokenMock.sol";
 import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
-import {Raffle} from '../src/Raffle.sol';
+import {Raffle} from "../src/Raffle.sol";
 
 /**
  * @title CreateSubscription Script for VRFCoordinatorV2Mock
@@ -45,7 +45,8 @@ contract FundSubscription is Script {
 
     function fundSubscriptionFromConfig() public {
         HelperConfig helperConfig = new HelperConfig();
-        (,, address vrfCoordinatorV2,,uint64 subscriptionId,, address linkToken, uint256 deployerKey) = helperConfig.s_activeNetworkConfig();
+        (,, address vrfCoordinatorV2,, uint64 subscriptionId,, address linkToken, uint256 deployerKey) =
+            helperConfig.s_activeNetworkConfig();
         fundSubscription(vrfCoordinatorV2, subscriptionId, linkToken, deployerKey);
     }
 
@@ -55,25 +56,20 @@ contract FundSubscription is Script {
         console.log("Funding subscription: ", subscriptionId);
         console.log("Using vrfCoordinator: ", vrfCoordinatorV2);
         console.log("On ChainID: ", block.chainid);
-        
+
         uint256 anvilChainId = 31337;
         VRFCoordinatorV2Mock vrfCoordinator = VRFCoordinatorV2Mock(vrfCoordinatorV2);
         // Custom Logic for Anvil chain
         // Reason - Fund Subscription Works differntly for MOCK Contract
-        if(block.chainid == anvilChainId) {
+        if (block.chainid == anvilChainId) {
             vm.startBroadcast(deployerKey);
-            vrfCoordinator.fundSubscription(subscriptionId,LINK_TOKEN_FUNDED);
+            vrfCoordinator.fundSubscription(subscriptionId, LINK_TOKEN_FUNDED);
             vm.stopBroadcast();
-        }
-        else{
+        } else {
             // Note - deployer should have enough LINK to fund the subscription
             vm.startBroadcast(deployerKey);
             // On any network we have to call trnasferAndCall fn of LinkToken to fund
-            LinkToken(linkToken).transferAndCall(
-                vrfCoordinatorV2,
-                LINK_TOKEN_FUNDED,
-                abi.encode(subscriptionId)
-            );
+            LinkToken(linkToken).transferAndCall(vrfCoordinatorV2, LINK_TOKEN_FUNDED, abi.encode(subscriptionId));
             vm.stopBroadcast();
         }
         console.log("SUBSCRIPTION FUNDED WITH ID: %s", subscriptionId);
@@ -85,7 +81,6 @@ contract FundSubscription is Script {
  * Although Deployer uses the addConsumer, run & addConsumerUsingConfig are kept for testing purposes and making the script standalone
  */
 contract AddConsumer is Script {
-
     function run() external {
         // Get the consumer address as the latest Deployed Raffle Contract
         address raffleAddress = DevOpsTools.get_most_recent_deployment("Raffle", block.chainid);
@@ -94,7 +89,8 @@ contract AddConsumer is Script {
 
     function addConsumerUsingConfig(address consumer) public {
         HelperConfig helperConfig = new HelperConfig();
-        (,, address vrfCoordinatorV2,,uint64 subscriptionId,,, uint256 deployerKey) = helperConfig.s_activeNetworkConfig();
+        (,, address vrfCoordinatorV2,, uint64 subscriptionId,,, uint256 deployerKey) =
+            helperConfig.s_activeNetworkConfig();
         addConsumer(vrfCoordinatorV2, subscriptionId, consumer, deployerKey);
     }
 

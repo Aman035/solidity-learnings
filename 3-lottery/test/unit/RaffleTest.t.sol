@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {Raffle} from "../../src/Raffle.sol";
 import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
+import {Vm} from "forge-std/Vm.sol";
 
 contract RaffleTest is Test {
     /**
@@ -68,17 +69,20 @@ contract RaffleTest is Test {
         raffle.enterRaffle();
     }
 
-    function test_RaffleRevertOnEnteringWhileCalcululatingWinner() public {
-        // Arrange
+    modifier raffleEnteredAndTimePassed() {
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
         vm.warp(block.timestamp + interval); // cheatCode - Sets the time of blockchain to the given timestamp
         vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
+        _;
+    }
+
+    function test_RaffleRevertOnEnteringWhileCalcululatingWinner() public raffleEnteredAndTimePassed {
+        // Arrange
         raffle.performUpkeep("");
         // Act / Assert
         vm.expectRevert(Raffle.Raffle__NotOpen.selector);
         raffle.enterRaffle{value: entranceFee}();
-
     }
 
     function test_RaffleRecordsPlayerOnEntrance() public {
@@ -91,7 +95,7 @@ contract RaffleTest is Test {
         assert(raffle.getPlayers()[0] == PLAYER);
     }
 
-    function test_EventEmittedOnEntrance() public {
+    function test_RaffleEventEmittedOnEntrance() public {
         // Arrange
         vm.prank(PLAYER);
         /**
@@ -145,13 +149,9 @@ contract RaffleTest is Test {
         assert(!upkeepNeeded);
     }
 
-    function test_RaffleUpkeepFalseOnCalculatingState() public {
+    function test_RaffleUpkeepFalseOnCalculatingState() public raffleEnteredAndTimePassed {
         // Arrange - Make everything true other than Lottery Interval time
-        vm.prank(PLAYER);
-        raffle.enterRaffle{value: entranceFee}();
-        vm.warp(block.timestamp + interval + 1); // cheatCode - Sets the time of blockchain to the given timestamp
-        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
-        raffle.performUpkeep(""); // cheatCode - Calls the checkUpkeep() fn on the given contract
+        raffle.performUpkeep("");
         Raffle.RaffleState raffleState = raffle.getRaffleState();
         // Act
         (bool upkeepNeeded,) = raffle.checkUpkeep("");
@@ -160,12 +160,8 @@ contract RaffleTest is Test {
         assert(raffleState == Raffle.RaffleState.CALCULATING_WINNER);
     }
 
-    function test_RaffleUpkeepTrueOnAllConditionsMet() public {
+    function test_RaffleUpkeepTrueOnAllConditionsMet() public raffleEnteredAndTimePassed {
         // Arrange
-        vm.prank(PLAYER);
-        raffle.enterRaffle{value: entranceFee}();
-        vm.warp(block.timestamp + interval + 1); // cheatCode - Sets the time of blockchain to the given timestamp
-        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
         // Act
         (bool upkeepNeeded,) = raffle.checkUpkeep("");
         // Assert
@@ -182,29 +178,73 @@ contract RaffleTest is Test {
         Raffle.RaffleState rState = raffle.getRaffleState();
         // Act / Assert
         vm.expectRevert(
-            abi.encodeWithSelector(
-                Raffle.Raffle__UpkeepNotNeeded.selector,
-                currentBalance,
-                numPlayers,
-                rState
-            )
+            abi.encodeWithSelector(Raffle.Raffle__UpkeepNotNeeded.selector, currentBalance, numPlayers, rState)
         );
         raffle.performUpkeep("");
     }
 
-    function test_RafflePerformUpkeepWorksOnCheckUpkeepTrue() public {
-        // Arrange
-        vm.prank(PLAYER);
-        raffle.enterRaffle{value: entranceFee}();
-        vm.warp(block.timestamp + interval + 1); // cheatCode - Sets the time of blockchain to the given timestamp
-        vm.roll(block.number + 1); // cheatCode - Sets the block number to the given number
-        // Act
+    function test_RafflePerformUpkeepWorksOnCheckUpkeepTrue() public raffleEnteredAndTimePassed {
         raffle.performUpkeep("");
-        // Assert
-        assert(raffle.getRaffleState() == Raffle.RaffleState.CALCULATING_WINNER);
     }
 
+    function test_RafflePerformUpkeepUpdatesStateAndEmitEventOnCheckUpkeepTrue() public raffleEnteredAndTimePassed {
+        //Arrange
+        Raffle.RaffleState initalState = raffle.getRaffleState();
+        vm.recordLogs(); // cheatCode - Records all the events emitted by the EVM
+        // Act
+        raffle.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        // Assert
+        assert(initalState == Raffle.RaffleState.OPEN);
+        assert(raffle.getRaffleState() == Raffle.RaffleState.CALCULATING_WINNER);
+        // 1st event by VRFCoordinator Contract ( check the mock contract, it emits an event)
+        // 2nd event by raffle contract
+        assert(entries.length == 2);
+        /**
+         * Analyzing event logs
+         * every indexed event log param is a byte32 data
+         * https://book.getfoundry.sh/cheatcodes/record-logs?highlight=Vm.log#examples
+         */
+        // 1. Raffle Contract Event
+        // event RequestedRandomness(uint256 indexed requestId);
+        bytes32 raffleEventSignature = entries[1].topics[0];
+        assert(raffleEventSignature == keccak256("RequestedRandomness(uint256)"));
 
+        bytes32 raffleEventRequestId = entries[1].topics[1];
+        assert(uint256(raffleEventRequestId) > 0); // it keeps on increasing with no. of requests ( see requestId logic in VRFCoordinatorV2Mock.sol )
 
+        // 2. VRFCoordinator Contract Event
+        // Check the VRF Coordinator Mock contract, it emits an event
+        // event RandomWordsRequested(
+        //     bytes32 indexed keyHash,
+        //     uint256 requestId,
+        //     uint256 preSeed,
+        //     uint64 indexed subId,
+        //     uint16 minimumRequestConfirmations,
+        //     uint32 callbackGasLimit,
+        //     uint32 numWords,
+        //     address indexed sender
+        // );
+        bytes32 vrfCoordinatorEventSignature = entries[0].topics[0];
+        assert(
+            vrfCoordinatorEventSignature
+                == keccak256("RandomWordsRequested(bytes32,uint256,uint256,uint64,uint16,uint32,uint32,address)")
+        );
 
+        bytes32 vrfCoordinatorEventGaslane = entries[0].topics[1];
+        assert(vrfCoordinatorEventGaslane == gasLane);
+
+        bytes32 vrfCoordinatorSubscriptionId = entries[0].topics[2];
+        assert(uint256(vrfCoordinatorSubscriptionId) == subscriptionId);
+
+        bytes32 vrfCoordinatorEventSender = entries[0].topics[3];
+        assert(address(uint160(uint256(vrfCoordinatorEventSender))) == address(raffle)); // Getting address from bytes32 is tricky
+
+        (uint256 vrfRequestId,, uint16 vrfMinimumRequestConfirmations, uint32 vrfCallbackGasLimit, uint32 vrfNumWords) =
+            abi.decode(entries[0].data, (uint256, uint256, uint16, uint32, uint32));
+        assert(vrfRequestId == uint256(raffleEventRequestId));
+        assert(vrfMinimumRequestConfirmations == 2); // provided in Raffle contract
+        assert(vrfCallbackGasLimit == callbackGasLimit);
+        assert(vrfNumWords == 1); // provided in Raffle contract
+    }
 }
