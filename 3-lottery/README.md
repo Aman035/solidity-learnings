@@ -115,3 +115,14 @@ A Raffle Contract with the following features :-
   2. Subscription should be funded using LINK Token - for local one needs to deploy a mock LINK Token
   3. Raffle Contract should be added as a consumer to VRFCoordinatorV2 - foundry-devops is used for getting the latest deployed Raffle contract so that it can be added as consumer. ( For this ffi should be true in foundry.toml )
   4. We added deployerKey in deploy script since only the address which created the subscription can add the raffle contract as a consumer, there using the default anvil key won't work and deployer script will fail.
+- Reason for commenting out `DevOpsTools` in `AddConsumer` contract script - Due to some reason it was also (getting deployed to sepolia)[https://github.com/Cyfrin/foundry-full-course-f23/discussions/590] costing more Gas.
+
+#### Make File
+
+- Makes it easy to run long and tedious commands again and again
+- To deploy on sepolia `make deploy ARGS="--network sepolia"`
+
+#### ChainLink Automation
+
+- Currently this was added using the (UI)[https://docs.chain.link/chainlink-automation/job-scheduler]
+- https://automation.chain.link/sepolia/32593375624562305526869054244033959315102023589452877980076413090930912039984
