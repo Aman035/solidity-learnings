@@ -6,6 +6,7 @@ import {Raffle} from "../../src/Raffle.sol";
 import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {Vm} from "forge-std/Vm.sol";
+import {VRFCoordinatorV2Mock} from "../mocks/VRFCoordinatorV2Mock.sol";
 
 contract RaffleTest is Test {
     /**
@@ -47,7 +48,7 @@ contract RaffleTest is Test {
     }
 
     function test_RaffleInitialPlayers() public view {
-        assert(raffle.getPlayers().length == 0);
+        assert(raffle.getPlayersLength() == 0);
     }
 
     function test_RaffleInitialWinner() public view {
@@ -91,8 +92,8 @@ contract RaffleTest is Test {
         // Act
         raffle.enterRaffle{value: entranceFee}();
         // Assert
-        assert(raffle.getPlayers().length == 1);
-        assert(raffle.getPlayers()[0] == PLAYER);
+        assert(raffle.getPlayersLength() == 1);
+        assert(raffle.getPlayer(0) == PLAYER);
     }
 
     function test_RaffleEventEmittedOnEntrance() public {
@@ -243,8 +244,73 @@ contract RaffleTest is Test {
         (uint256 vrfRequestId,, uint16 vrfMinimumRequestConfirmations, uint32 vrfCallbackGasLimit, uint32 vrfNumWords) =
             abi.decode(entries[0].data, (uint256, uint256, uint16, uint32, uint32));
         assert(vrfRequestId == uint256(raffleEventRequestId));
-        assert(vrfMinimumRequestConfirmations == 2); // provided in Raffle contract
+        assert(vrfMinimumRequestConfirmations == 3); // provided in Raffle contract
         assert(vrfCallbackGasLimit == callbackGasLimit);
         assert(vrfNumWords == 1); // provided in Raffle contract
+    }
+
+    ///////////////////////////
+    // fulfillRandomWords()  //
+    ///////////////////////////
+    modifier skipFork() {
+        if (block.chainid != 31337) {
+            return;
+        }
+        _;
+    }
+
+    // This is a Fuzz Test ( Foundry runs this test specifying diff values for requestId )
+    function test_fulfillRandomWordsRevertOnWrongRequestId(uint256 requestId) public skipFork {
+        // Arrange
+        // Act / Assert
+        vm.expectRevert("nonexistent request");
+        VRFCoordinatorV2Mock vrfCoordinatorV2Mock = VRFCoordinatorV2Mock(vrfCoordinatorV2);
+        vrfCoordinatorV2Mock.fulfillRandomWords(requestId, address(raffle));
+    }
+
+    function test_fulfillRandomWordsOnConditionsMet() public raffleEnteredAndTimePassed skipFork {
+        // Arrange
+
+        // Enter 5 players
+        // 1st using modifier and 4 using for loop
+        for (uint256 i = 1; i < 5; i++) {
+            address player = address(uint160(i)); // other way of creating address
+            hoax(player, STARTING_BALANCE); // cheatcode - prank + deal
+            raffle.enterRaffle{value: entranceFee}();
+        }
+
+        assert(raffle.getPlayersLength() == 5);
+        assert(raffle.getRecentWinner() == address(0));
+
+        uint256 prizePool = address(raffle).balance;
+        assert(prizePool == entranceFee * 5);
+
+        uint256 startingTimestamp = raffle.getLastTimeStamp();
+        uint256 initialWinnerBalance = STARTING_BALANCE - entranceFee;
+
+        // Act
+        vm.recordLogs(); // cheatCode - Records all the events emitted by the EVM
+        raffle.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        uint256 raffleEventRequestId = uint256(entries[1].topics[1]);
+        VRFCoordinatorV2Mock(vrfCoordinatorV2).fulfillRandomWords(raffleEventRequestId, address(raffle));
+
+        // now it will also have RandomWordsFulfilled ( from VRFCoordinator ) and PickedWinner Event also
+        entries = vm.getRecordedLogs();
+
+        // Assert
+        address winner = raffle.getRecentWinner();
+        assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
+        assert(winner != address(0));
+        assert(address(raffle).balance == 0);
+        assert(raffle.getLastTimeStamp() > startingTimestamp);
+        assert(winner.balance == initialWinnerBalance + prizePool);
+
+        // event PickedWinner(address indexed winner);
+        bytes32 raffleEventSignature = entries[0].topics[0];
+        assert(raffleEventSignature == keccak256("PickedWinner(address)"));
+
+        bytes32 raffleEventWinner = entries[0].topics[1];
+        assert(address(uint160(uint256(raffleEventWinner))) == winner);
     }
 }

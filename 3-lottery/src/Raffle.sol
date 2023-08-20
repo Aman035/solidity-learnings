@@ -31,7 +31,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     /* State Variables */
     bytes32 private immutable i_gasLane;
     uint64 private immutable i_subscriptionId;
-    uint16 private REQUEST_CONFIRMATIONS = 2;
+    uint16 private REQUEST_CONFIRMATIONS = 3;
     uint32 private i_callbackGasLimit;
     uint32 private constant NUM_WORDS = 1;
     uint256 private i_entranceFee;
@@ -145,8 +145,8 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         return s_players[indexOfPlayer];
     }
 
-    function getPlayers() external view returns (address payable[] memory) {
-        return s_players;
+    function getPlayersLength() external view returns (uint256) {
+        return s_players.length;
     }
 
     function getLastTimeStamp() external view returns (uint256) {

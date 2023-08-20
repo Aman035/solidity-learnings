@@ -102,7 +102,9 @@ A Raffle Contract with the following features :-
   - Act
   - Asset
 - [Foundry Cheatcodes](https://book.getfoundry.sh/cheatcodes/) can be very useful for tests and help to test various conditions as depicted in test files.
-- Checkout `test_RafflePerformUpkeepUpdatesStateAndEmitEventOnCheckUpkeepTrue` as it focuses on detailed analysis and testing of an event.
+- Checkout `test_RafflePerformUpkeepUpdatesStateAndEmitEventOnCheckUpkeepTrue` as it focuses on detailed analysis and testing of an event. ( Mostly running test with -vvvv shows all event details too. )
+- [Fuzz Tests](https://book.getfoundry.sh/forge/fuzz-testing?highlight=fuzz#fuzz-testing) are important to test a fn for various inputs.
+- The tests where we call `vrfCoordinatorV2Mock.fulfillRandomWords` should be skipped on other networks since this would be called by chainLink nodes itself.
 
 #### Deploy Scripts Overview
 
@@ -112,3 +114,4 @@ A Raffle Contract with the following features :-
   1. A subscription should be created.
   2. Subscription should be funded using LINK Token - for local one needs to deploy a mock LINK Token
   3. Raffle Contract should be added as a consumer to VRFCoordinatorV2 - foundry-devops is used for getting the latest deployed Raffle contract so that it can be added as consumer. ( For this ffi should be true in foundry.toml )
+  4. We added deployerKey in deploy script since only the address which created the subscription can add the raffle contract as a consumer, there using the default anvil key won't work and deployer script will fail.
