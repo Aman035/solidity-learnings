@@ -5,7 +5,7 @@ import {Script, console} from "forge-std/Script.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 import {VRFCoordinatorV2Mock} from "../test/mocks/VRFCoordinatorV2Mock.sol";
 import {LinkToken} from "../test/mocks/LinkTokenMock.sol";
-import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
+// import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
 import {Raffle} from "../src/Raffle.sol";
 
 /**
@@ -81,18 +81,18 @@ contract FundSubscription is Script {
  * Although Deployer uses the addConsumer, run & addConsumerUsingConfig are kept for testing purposes and making the script standalone
  */
 contract AddConsumer is Script {
-    function run() external {
-        // Get the consumer address as the latest Deployed Raffle Contract
-        address raffleAddress = DevOpsTools.get_most_recent_deployment("Raffle", block.chainid);
-        addConsumerUsingConfig(raffleAddress);
-    }
+    // function run() external {
+    //     // Get the consumer address as the latest Deployed Raffle Contract
+    //     address raffleAddress = DevOpsTools.get_most_recent_deployment("Raffle", block.chainid);
+    //     addConsumerUsingConfig(raffleAddress);
+    // }
 
-    function addConsumerUsingConfig(address consumer) public {
-        HelperConfig helperConfig = new HelperConfig();
-        (,, address vrfCoordinatorV2,, uint64 subscriptionId,,, uint256 deployerKey) =
-            helperConfig.s_activeNetworkConfig();
-        addConsumer(vrfCoordinatorV2, subscriptionId, consumer, deployerKey);
-    }
+    // function addConsumerUsingConfig(address consumer) public {
+    //     HelperConfig helperConfig = new HelperConfig();
+    //     (,, address vrfCoordinatorV2,, uint64 subscriptionId,,, uint256 deployerKey) =
+    //         helperConfig.s_activeNetworkConfig();
+    //     addConsumer(vrfCoordinatorV2, subscriptionId, consumer, deployerKey);
+    // }
 
     function addConsumer(address vrfCoordinatorV2, uint64 subscriptionId, address consumer, uint256 deployerKey)
         public
