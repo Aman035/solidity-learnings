@@ -5,7 +5,6 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Project Purpose](#project-purpose)
 - [Requirements](#requirements)
 - [Learnings + Resources](#learnings--resources)
 
@@ -18,12 +17,11 @@ A Raffle Contract with the following features :-
   - Chainlink automation will be used for this
   - Chainlink VRF is used for having true randomness
 
-## Project Purpose
-
 ## Requirements
 
 - `Git`
 - `Foundry`
+- `jq` ( Requirement for [Foundry DevOps](https://github.com/Cyfrin/foundry-devops) )
 - `make` ( Optional )
 
 ## Learnings + Resources

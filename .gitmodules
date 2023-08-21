@@ -1,0 +1,3 @@
+[submodule "4-TicTacToken/lib/forge-std"]
+	path = 4-TicTacToken/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
