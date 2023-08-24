@@ -40,7 +40,7 @@ contract DeployRaffle is Script {
          * 3. Deploy Raffle Contract
          */
         // Deployer Key is used to deploy the contract
-        vm.startBroadcast(deployerKey);
+        vm.startBroadcast(deployerKey); // ( This is not needed after adding private key in the makefile )
         Raffle raffle = new Raffle(entranceFee, interval, vrfCoordinatorV2, gasLane, subscriptionId, callbackGasLimit);
         vm.stopBroadcast();
 

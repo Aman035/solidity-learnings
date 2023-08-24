@@ -57,7 +57,7 @@ contract HelperConfig is Script {
             subscriptionId: 4542, // Already Created using Chainlink Dashboard
             callbackGasLimit: 100000,
             linkToken: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
-            deployerKey: vm.envUint("PRIVATE_KEY") // cheatcode - Reades private key from the env
+            deployerKey: vm.envUint("PRIVATE_KEY") // cheatcode - Reads private key from the env
         });
     }
 
