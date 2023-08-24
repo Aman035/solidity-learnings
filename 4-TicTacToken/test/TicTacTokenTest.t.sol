@@ -6,20 +6,43 @@ import {Vm} from "forge-std/Vm.sol";
 import {TicTacToken} from "../src/TicTacToken.sol";
 import {DeployTicTacToken} from "../script/DeployTicTacToken.s.sol";
 
+/**
+ * This helps to mock fn calls rather than using vm.prank again and again
+ */
+contract Player is Test {
+    TicTacToken private ttt;
+    address public playerAddress;
+
+    constructor(TicTacToken _ttt, address _player) {
+        ttt = _ttt;
+        playerAddress = _player;
+    }
+
+    function markSpace(uint8 space) public {
+        vm.prank(playerAddress);
+        ttt.markSpace(space);
+    }
+
+}
+
 contract TicTacTokenTest is Test {
     // Events
     event SpaceMarked(uint8 indexed space, TicTacToken.Symbol symbol);
 
     // State Variables
     TicTacToken ttt;
-    address playerX;
-    address playerO;
+    Player X;
+    Player O;
     address OWNER = msg.sender;
 
     function setUp() public {
         // Using Deployment Script
         DeployTicTacToken deployer = new DeployTicTacToken();
-        (ttt, playerX, playerO) = deployer.run();
+        (TicTacToken deployedTTT , address playerX, address playerO) = deployer.run();
+        
+        ttt = TicTacToken(deployedTTT);
+        X = new Player(ttt, playerX);
+        O = new Player(ttt, playerO);
     }
 
     ///////////////////////////////
@@ -33,7 +56,7 @@ contract TicTacTokenTest is Test {
     }
 
     function test_initial_turn_is_of_playerX() public view {
-        assert(ttt.currentTurn() == playerX);
+        assert(ttt.getCurrentTurn() == X.playerAddress());
     }
 
     ///////////////////////////////
@@ -44,42 +67,34 @@ contract TicTacTokenTest is Test {
         // Arrange
         uint8 invalidSpace = 9;
         // Act / Assert
-        vm.prank(playerX);
         vm.expectRevert(TicTacToken.TicTacToken__InvalidSpace.selector);
-        ttt.markSpace(invalidSpace);
+        X.markSpace(invalidSpace);
     }
 
     function test_cannot_overwrite_marked_space() public {
         // Arrange
-        vm.prank(playerX);
-        ttt.markSpace(0);
+        X.markSpace(0);
         // Act / Assert
-        vm.prank(playerO);
         vm.expectRevert(TicTacToken.TickTacToken__SpaceAlreadyMarked.selector);
-        ttt.markSpace(0);
+        O.markSpace(0);
     }
 
     function test_can_mark_space_with_X() public {
-        vm.prank(playerX);
-        ttt.markSpace(0);
+        X.markSpace(0);
         assert(ttt.getBoardSpace(0) == TicTacToken.Symbol.X);
     }
 
     function test_can_mark_space_with_O() public {
-        vm.prank(playerX);
-        ttt.markSpace(0);
-        vm.prank(playerO);
-        ttt.markSpace(1);
+        X.markSpace(0);
+        O.markSpace(1);
         assert(ttt.getBoardSpace(1) == TicTacToken.Symbol.O);
     }
 
     function test_mark_space_updates_turn() public {
-        vm.prank(playerX);
-        ttt.markSpace(0);
-        assert(ttt.currentTurn() == playerO);
-        vm.prank(playerO);
-        ttt.markSpace(1);
-        assert(ttt.currentTurn() == playerX);
+        X.markSpace(0);
+        assert(ttt.getCurrentTurn() == O.playerAddress());
+        O.markSpace(1);
+        assert(ttt.getCurrentTurn() == X.playerAddress());
     }
 
     function test_mark_space_emits_event() public {
@@ -87,20 +102,17 @@ contract TicTacTokenTest is Test {
         // Act / Assert
         vm.expectEmit(address(ttt)); // address of emit emitter
         uint8 markedSpace = 0;
-        vm.prank(playerX);
         emit SpaceMarked(markedSpace, TicTacToken.Symbol.X); // expected emitted event
-        ttt.markSpace(markedSpace);
+        X.markSpace(markedSpace);
     }
 
     ///////////////////////////////
     // getBoardSpace             //
     ///////////////////////////////
     function test_getBoardSpace_reverts_for_invalid_space() public {
-        // Arrange
-        uint8 invalidSpace = 9;
-        // Act / Assert
+        // Arrange // Act // Assert
         vm.expectRevert(TicTacToken.TicTacToken__InvalidSpace.selector);
-        ttt.getBoardSpace(invalidSpace);
+        ttt.getBoardSpace(9);
     }
     // All other tcases are covered by markSpace tests
 
@@ -113,103 +125,67 @@ contract TicTacTokenTest is Test {
     }
 
     function test_game_in_progress_returns_no_winner() public {
-        vm.prank(playerX);
-        ttt.markSpace(1);
+        X.markSpace(1);
         assert(ttt.getWinner() == address(0));
     }
 
     function test_draw_returns_no_winner() public {
-        vm.prank(playerX);
-        ttt.markSpace(4); // X
-        vm.prank(playerO);
-        ttt.markSpace(0); // O
-        vm.prank(playerX);
-        ttt.markSpace(1); // X
-        vm.prank(playerO);
-        ttt.markSpace(7); // O
-        vm.prank(playerX);
-        ttt.markSpace(2); // X
-        vm.prank(playerO);
-        ttt.markSpace(6); // O
-        vm.prank(playerX);
-        ttt.markSpace(8); // X
-        vm.prank(playerO);
-        ttt.markSpace(5); // O
+        X.markSpace(4);
+        O.markSpace(0);
+        X.markSpace(1); 
+        O.markSpace(7);
+        X.markSpace(2);
+        O.markSpace(6);
+        X.markSpace(8);
+        O.markSpace(5);
         assert(ttt.getWinner() == address(0));
     }
 
     function test_checks_for_horizontal_win() public {
-        vm.prank(playerX);
-        ttt.markSpace(0); // X
-        vm.prank(playerO);
-        ttt.markSpace(3); // O
-        vm.prank(playerX);
-        ttt.markSpace(1); // X
-        vm.prank(playerO);
-        ttt.markSpace(4); // O
-        vm.prank(playerX);
-        ttt.markSpace(2); // X
-        assert(ttt.getWinner() == playerX);
+        X.markSpace(0);
+        O.markSpace(3);
+        X.markSpace(1);
+        O.markSpace(4);
+        X.markSpace(2);
+        assert(ttt.getWinner() == X.playerAddress());
     }
 
     function test_checks_for_horizontal_win_row2() public {
-        vm.prank(playerX);
-        ttt.markSpace(3); // X
-        vm.prank(playerO);
-        ttt.markSpace(0); // O
-        vm.prank(playerX);
-        ttt.markSpace(4); // X
-        vm.prank(playerO);
-        ttt.markSpace(1); // O
-        vm.prank(playerX);
-        ttt.markSpace(5); // X
-        assert(ttt.getWinner() == playerX);
+        X.markSpace(3);
+        O.markSpace(0);
+        X.markSpace(4);
+        O.markSpace(1);
+        X.markSpace(5);
+        assert(ttt.getWinner() == X.playerAddress());
     }
 
     function test_checks_for_vertical_win() public {
-        vm.prank(playerX);
-        ttt.markSpace(1); // X
-        vm.prank(playerO);
-        ttt.markSpace(0); // O
-        vm.prank(playerX);
-        ttt.markSpace(2); // X
-        vm.prank(playerO);
-        ttt.markSpace(3); // O
-        vm.prank(playerX);
-        ttt.markSpace(4); // X
-        vm.prank(playerO);
-        ttt.markSpace(6); // O
-        assert(ttt.getWinner() == playerO);
+        X.markSpace(1);
+        O.markSpace(0);
+        X.markSpace(2);
+        O.markSpace(3);
+        X.markSpace(4);
+        O.markSpace(6);
+        assert(ttt.getWinner() == O.playerAddress());
     }
 
     function test_checks_for_diagonal_win() public {
-        vm.prank(playerX);
-        ttt.markSpace(0); // X
-        vm.prank(playerO);
-        ttt.markSpace(1); // O
-        vm.prank(playerX);
-        ttt.markSpace(4); // X
-        vm.prank(playerO);
-        ttt.markSpace(5); // O
-        vm.prank(playerX);
-        ttt.markSpace(8); // X
-        assert(ttt.getWinner() == playerX);
+        X.markSpace(0);
+        O.markSpace(1);
+        X.markSpace(4);
+        O.markSpace(5);
+        X.markSpace(8);
+        assert(ttt.getWinner() == X.playerAddress());
     }
 
     function test_checks_for_antidiagonal_win() public {
-        vm.prank(playerX);
-        ttt.markSpace(1); // X
-        vm.prank(playerO);
-        ttt.markSpace(2); // O
-        vm.prank(playerX);
-        ttt.markSpace(3); // X
-        vm.prank(playerO);
-        ttt.markSpace(4); // O
-        vm.prank(playerX);
-        ttt.markSpace(5); // X
-        vm.prank(playerO);
-        ttt.markSpace(6); // O
-        assert(ttt.getWinner() == playerO);
+        X.markSpace(1);
+        O.markSpace(2);
+        X.markSpace(3);
+        O.markSpace(4);
+        X.markSpace(5);
+        O.markSpace(6);
+        assert(ttt.getWinner() == O.playerAddress());
     }
 
     ///////////////////////////////

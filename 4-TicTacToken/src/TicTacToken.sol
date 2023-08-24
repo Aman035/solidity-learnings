@@ -76,16 +76,13 @@ contract TicTacToken {
         if (!_emptySpace(space)) {
             revert TickTacToken__SpaceAlreadyMarked();
         }
-        // To avoid multiple storage reads
-        Turn currentPlayerTurn = s_currentTurn;
-        if (
-            (msg.sender == i_playerX && currentPlayerTurn != Turn.X_TURN)
-                || (msg.sender == i_playerO && currentPlayerTurn != Turn.O_TURN)
-        ) {
+        if(getCurrentTurn() != msg.sender) {
             revert TickTacToken__NotYourTurn();
         }
 
-        Symbol symbol = (currentPlayerTurn == Turn.X_TURN) ? Symbol.X : Symbol.O;
+        // To avoid multiple storage reads
+        Turn currentPlayerTurn = s_currentTurn;
+        Symbol symbol = _convertPlayerToSymbol(msg.sender);
         s_board[space] = symbol;
         s_currentTurn = (currentPlayerTurn == Turn.X_TURN) ? Turn.O_TURN : Turn.X_TURN;
 
@@ -119,13 +116,22 @@ contract TicTacToken {
         return msg.sender == i_playerX || msg.sender == i_playerO;
     }
 
-    function _convertSymbolToAddress(Symbol symbol) private view returns (address) {
+    function _convertSymbolToPlayer(Symbol symbol) private view returns (address) {
         if (symbol == Symbol.X) {
             return i_playerX;
         } else if (symbol == Symbol.O) {
             return i_playerO;
         }
         return address(0);
+    }
+
+    function _convertPlayerToSymbol(address player) private view returns (Symbol) {
+        if (player == i_playerX) {
+            return Symbol.X;
+        } else if (player == i_playerO) {
+            return Symbol.O;
+        }
+        return Symbol.EMPTY;
     }
 
     /**
@@ -196,7 +202,7 @@ contract TicTacToken {
         return i_playerO;
     }
 
-    function currentTurn() external view returns (address) {
+    function getCurrentTurn() public view returns (address) {
         return s_currentTurn == Turn.X_TURN ? i_playerX : i_playerO;
     }
 
@@ -212,7 +218,7 @@ contract TicTacToken {
         Symbol[8] memory wins = [_row(0), _row(1), _row(2), _col(0), _col(1), _col(2), _diag(), _antiDiag()];
         for (uint256 i; i < wins.length; ++i) {
             Symbol win = wins[i];
-            if (win == Symbol.X || win == Symbol.O) return _convertSymbolToAddress(win);
+            if (win == Symbol.X || win == Symbol.O) return _convertSymbolToPlayer(win);
         }
         return address(0);
     }
