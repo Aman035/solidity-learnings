@@ -1,6 +1,6 @@
-[submodule "4-TicTacToken/lib/forge-std"]
-	path = 4-TicTacToken/lib/forge-std
+[submodule "lib/forge-std"]
+	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "4-TicTacToken/lib/solmate"]
+[submodule "lib/solmate"]
 	path = 4-TicTacToken/lib/solmate
 	url = https://github.com/transmissions11/solmate
