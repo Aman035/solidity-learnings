@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import {Token} from './token.sol';
-import {NFT} from './NFT.sol';
+
+import {Token} from "./token.sol";
+import {NFT} from "./NFT.sol";
 
 /**
  * @title TicTacToken
@@ -117,13 +118,12 @@ contract TicTacToken {
         emit SpaceMarked(space, symbol);
     }
 
-
     /// @dev Owner can reset only uncompleted games ( cases when game tied )
     function resetBoard(uint256 gameId) external {
         if (msg.sender != i_owner) {
             revert TickTacToken__Unauthorized();
         }
-        if(s_games[gameId].completed) {
+        if (s_games[gameId].completed) {
             revert TickTacToken__CompletedGameCannotBeReset();
         }
         delete s_games[gameId].board; // sets with dafault value in array
@@ -219,6 +219,14 @@ contract TicTacToken {
     /**
      * Getters
      */
+
+    function getTokenAddress() external view returns (address) {
+        return address(i_token);
+    }
+
+    function getNFTAddress() external view returns (address) {
+        return address(i_nft);
+    }
 
     function getOwner() external view returns (address) {
         return i_owner;
