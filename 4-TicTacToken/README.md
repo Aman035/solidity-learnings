@@ -13,6 +13,10 @@ This project is a bit different from the referenced project. I actually have mod
 
 A Tic Tac Token Game with the following features :-
 
+1. Add multiple game instances btw 2 players
+2. Owner can reset a game incase it is tied
+3. Winner of a game gets an NFT and erc20 Tokens based on no. of moves taken to win.
+
 ## Requirements
 
 - `Git`
