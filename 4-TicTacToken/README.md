@@ -38,6 +38,7 @@ function compareStrings(string memory a, string memory b) public view returns (b
 
 #### ERC20 And ERC721 Tokens
 
-- Unserstanding Fungiable & Non-Funcgiable Tokens
+- [EIP20](https://eips.ethereum.org/EIPS/eip-20)
+- [EIP721](https://eips.ethereum.org/EIPS/eip-721)
 - Difference Btw mint and safeMint - safeMint checks that the address to whom the tokens are being tranfered is able to receive and use it, otherwise it will be locked and forever lost.
 - [SafeMint can also create security issues](https://samczsun.com/the-dangers-of-surprising-code/)
