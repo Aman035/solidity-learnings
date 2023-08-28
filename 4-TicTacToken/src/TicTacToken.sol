@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {Token} from './token.sol';
+import {NFT} from './NFT.sol';
 
 /**
  * @title TicTacToken
@@ -14,6 +16,8 @@ contract TicTacToken {
     error TickTacToken__NotYourTurn();
     error TickTacToken__Unauthorized();
     error TickTacToken__InvalidPlayer();
+    error TickTacToken__GameAlreadyCompleted();
+    error TickTacToken__CompletedGameCannotBeReset();
 
     /**
      * Interfaces
@@ -29,6 +33,7 @@ contract TicTacToken {
     }
 
     struct Game {
+        bool completed;
         uint8 turns;
         Symbol[9] board;
         address playerX;
@@ -38,10 +43,10 @@ contract TicTacToken {
     /**
      * State Variables
      */
+    Token private immutable i_token;
+    NFT private immutable i_nft;
     address private immutable i_owner;
     mapping(uint256 => Game) private s_games;
-    mapping(address => uint256) private s_winCount;
-    mapping(address => uint256) private s_points;
     uint256 private s_nextGameId;
 
     /**
@@ -66,6 +71,10 @@ contract TicTacToken {
 
     constructor() {
         i_owner = msg.sender;
+        // Deploy Token and NFT
+        /// @dev Token and NFT are owned by this contract
+        i_token = new Token();
+        i_nft = new NFT();
     }
 
     /**
@@ -78,6 +87,7 @@ contract TicTacToken {
     }
 
     function markSpace(uint256 gameId, uint8 space) external validSpace(space) {
+        /// @notice This can be gas optimized by using memory rather than calling the storage s_games in each condition
         if (!_validPlayer(gameId)) {
             revert TickTacToken__InvalidPlayer();
         }
@@ -87,22 +97,34 @@ contract TicTacToken {
         if (getCurrentTurn(gameId) != msg.sender) {
             revert TickTacToken__NotYourTurn();
         }
+        if (s_games[gameId].completed) {
+            revert TickTacToken__GameAlreadyCompleted();
+        }
 
         Symbol symbol = _convertPlayerToSymbol(gameId, msg.sender);
         s_games[gameId].board[space] = symbol;
         ++s_games[gameId].turns;
 
-        if (getWinner(gameId) != address(0)) {
-            ++s_winCount[getWinner(gameId)];
-            s_points[getWinner(gameId)] += _pointsEarned(gameId);
+        address winner = getWinner(gameId);
+        if (winner != address(0)) {
+            s_games[gameId].completed = true;
+            // Mint NFT to winner
+            i_nft.mint(winner, gameId);
+            // Mint tokens to winner
+            i_token.mint(winner, _pointsEarned(gameId));
         }
 
         emit SpaceMarked(space, symbol);
     }
 
+
+    /// @dev Owner can reset only uncompleted games ( cases when game tied )
     function resetBoard(uint256 gameId) external {
         if (msg.sender != i_owner) {
             revert TickTacToken__Unauthorized();
+        }
+        if(s_games[gameId].completed) {
+            revert TickTacToken__CompletedGameCannotBeReset();
         }
         delete s_games[gameId].board; // sets with dafault value in array
     }
