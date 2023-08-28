@@ -31,3 +31,7 @@ function compareStrings(string memory a, string memory b) public view returns (b
     return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
 }
 ```
+
+#### ERC20 And ERC721 Tokens
+
+- Diff btw Mint and SafeMint
