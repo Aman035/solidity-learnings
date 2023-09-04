@@ -38,4 +38,7 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 endif
 
 deploy:
-	@forge script script/DeployTicTacToken.s.sol:DeployTicTacToken $(NETWORK_ARGS)
+	@forge script script/DeployBasicNFT.s.sol:DeployBasicNFT $(NETWORK_ARGS)
+
+mint:
+	@forge script script/Interactions.s.sol:MintBaiscNFT $(NETWORK_ARGS)
