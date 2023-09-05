@@ -97,3 +97,21 @@ fs_permissions = [{ access = "read", path = "./images" }]
 
 - Integration Test: Where more than 1 contract interacts with each other ( Eg NFT contract with deploy Scripts )
 - Unit Test: Where only 1 contract is tested ( Eg NFT contract without any other script contract or any other )
+
+### To Interact with contract
+
+- Mostly I have written interaction scripts for that
+
+```
+# DEPLOY
+make deployMoodNFT
+
+# MINT
+make mintMoodNFT
+```
+
+- To flipMood ( using cast )
+
+```
+cast send --private-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9  "flipMood(uint256)" 0  --rpc-url http://127.0.0.1:8545/
+```

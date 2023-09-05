@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {Test, console} from "forge-std/Test.sol";
 import {BasicNFT} from "../../src/BasicNFT.sol";
-import {DeployBasicNFT} from '../../script/DeployBasicNFT.s.sol';
+import {DeployBasicNFT} from "../../script/DeployBasicNFT.s.sol";
 
 contract DeployBasicNFTTest is Test {
     DeployBasicNFT deployBasicNFT;
@@ -12,7 +12,7 @@ contract DeployBasicNFTTest is Test {
         deployBasicNFT = new DeployBasicNFT();
     }
 
-    function testDeployMoodNFTDeploysNewMoodNFTInstance() public{
+    function testDeployMoodNFTDeploysNewMoodNFTInstance() public {
         deployBasicNFT.run();
     }
 }
