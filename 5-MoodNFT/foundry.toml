@@ -8,3 +8,6 @@ remappings = ["@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"]
 
 # For foundry-devops lib
 ffi = true
+
+# Read access to ./images folder ( used for vm.readFile cheatcode )
+fs_permissions = [{ access = "read", path = "./images" }]

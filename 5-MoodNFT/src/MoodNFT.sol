@@ -8,7 +8,7 @@ import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 contract MoodNFT is ERC721 {
     /* Errors */
     error MoodNFT__NonOwnerCannotFlipMood();
-    
+
     /* Type Declarations */
     enum Mood {
         SAD,
@@ -41,10 +41,10 @@ contract MoodNFT is ERC721 {
     }
 
     function flipMood(uint256 tokenId) external {
-        if(ownerOf(tokenId) != msg.sender) {
+        if (!_isApprovedOrOwner(msg.sender, tokenId)) {
             revert MoodNFT__NonOwnerCannotFlipMood();
         }
-        if(s_tokenIdToMood[tokenId] == Mood.HAPPY) {
+        if (s_tokenIdToMood[tokenId] == Mood.HAPPY) {
             s_tokenIdToMood[tokenId] = Mood.SAD;
         } else {
             s_tokenIdToMood[tokenId] = Mood.HAPPY;
@@ -100,5 +100,9 @@ contract MoodNFT is ERC721 {
 
     function getTokenCounter() external view returns (uint256) {
         return s_tokenCounter;
+    }
+
+    function getTokenMood(uint256 tokenId) external view returns (Mood) {
+        return s_tokenIdToMood[tokenId];
     }
 }
