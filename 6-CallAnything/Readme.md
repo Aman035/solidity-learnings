@@ -26,5 +26,8 @@ Al the examples here are tested using `remix`.
 
 - Each contract assigns each function a unique function ID. This is known as the "function selector".
   - Note - This also means that a single contract cannot have two functions with the same function selector. ( There are same possible cases where a contract might not compile since 2 functions have same function selector )
+  - A Good resource to check functions with same selectors - https://openchain.xyz/signatures
+    ![image](https://github.com/Aman035/solidity-learnings/assets/54989169/6d13c078-9920-4203-8bfa-78687600bb3c)
+
 - The `function selector` is the first 4 bytes of the function signature.
 - The `function signature` is a string that defines the function name & parameters.
