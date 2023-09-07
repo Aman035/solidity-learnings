@@ -1,9 +1,0 @@
-[submodule "5-MoodNFT/lib/forge-std"]
-	path = 5-MoodNFT/lib/forge-std
-	url = https://github.com/foundry-rs/forge-std
-[submodule "5-MoodNFT/lib/openzeppelin-contracts"]
-	path = 5-MoodNFT/lib/openzeppelin-contracts
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
-[submodule "5-MoodNFT/lib/foundry-devops"]
-	path = 5-MoodNFT/lib/foundry-devops
-	url = https://github.com/Cyfrin/foundry-devops

@@ -3,7 +3,8 @@
 Welcome to the Solidity Basics directory!
 
 This directory covers the basic concepts of Solidity.
-The practice subdirectory consists of some concepts which I found essential to practice or to experiment with.
+All the contracts implemented in this directory are some concepts which I found essential to practice or to experiment with.
+All the contracts are implemented using `remix`.
 
 ## Learnings + References
 
@@ -73,6 +74,7 @@ The practice subdirectory consists of some concepts which I found essential to p
 15. Pure and view functions do not cost when called externally. But they do cost when called internally.
 16. By default storage variables are internal.
 17. Assignment btw diff data locations types.
+
     - Assignments between storage and memory (or from calldata) always create an independent copy.
     - Assignments from memory to memory only create references. As a result changes to one memory variable are also visible in all other memory variables that refer to the same data.
 
@@ -80,3 +82,5 @@ The practice subdirectory consists of some concepts which I found essential to p
 
     - Assignments from storage to a localstorage variable also only assign a reference.
     - All other assignments to storage always creates independent copies.
+
+18.
