@@ -7,9 +7,9 @@ All the contracts implemented in this directory are some concepts which I found 
 All the contracts are implemented using `remix`.
 
 ## Learnings + References
-
-1. https://solidity-by-example.org/ - The Basics Section
-2. Assigning Min and Max Values to int and uint
+1. [Basic Blockchain Terminologies](https://connect.comptia.org/content/articles/blockchain-terminology)
+2. https://solidity-by-example.org/ - The Basics Section
+3. Assigning Min and Max Values to int and uint
 
    ```solidity
    // int
@@ -21,10 +21,10 @@ All the contracts are implemented using `remix`.
    uint public maxUint = type(uint).max; // 2^256-1
    ```
 
-3. Constant becomes part of the bytecode at compile time whereas immutable variables become part of bytecode at deployment.
+4. Constant becomes part of the bytecode at compile time whereas immutable variables become part of bytecode at deployment.
    - For a constant variable, the expression assigned to it is copied to all the places where it is accessed and also re-evaluated each time. This allows for local optimizations.
    - Immutable variables are evaluated once at construction time and their value is copied to all the places in the code where they are accessed. For these values, 32 bytes are reserved. Due to this, constant values can sometimes be cheaper than immutable values.
-4. `delete` keyword resets the value to default ( used in mappings and array )
+5. `delete` keyword resets the value to default ( used in mappings and array )
 
    ```solidity
    // Mapping from address to uint
@@ -39,10 +39,10 @@ All the contracts are implemented using `remix`.
    delete arr[index];
    ```
 
-5. Only fixed size array can be declared in memory ( ie inside functions ) and also mapping can’t be declared in memory.
-6. Bytes in Solidity
+6. Only fixed size array can be declared in memory ( ie inside functions ) and also mapping can’t be declared in memory.
+7. Bytes in Solidity
    [Solidity Tutorial : all about Bytes](https://jeancvllr.medium.com/solidity-tutorial-all-about-bytes-9d88fdb22676)
-7. Enums in solidity r a bit diff than TS - u can’t assign them anything
+8. Enums in solidity r a bit diff than TS - u can’t assign them anything
 
    ```solidity
    enum Status {
@@ -60,20 +60,20 @@ All the contracts are implemented using `remix`.
    // Canceled - 4
    ```
 
-8. Require Vs Assert [https://dev.to/tawseef/require-vs-assert-in-solidity-5e9d#:~:text=assert(bool condition) causes a,in inputs or external components](<https://dev.to/tawseef/require-vs-assert-in-solidity-5e9d#:~:text=assert(bool%20condition)%20causes%20a,in%20inputs%20or%20external%20components>).
-9. External visibility type is not available for state variables.
-10. Modifiers - [Solidity Tutorial : all about Modifiers](https://medium.com/coinmonks/solidity-tutorial-all-about-modifiers-a86cf81c14cb)
-11. Events - [Learn Solidity lesson 27. Events.](https://medium.com/coinmonks/learn-solidity-lesson-27-events-f47070b55851)
+9. Require Vs Assert [https://dev.to/tawseef/require-vs-assert-in-solidity-5e9d#:~:text=assert(bool condition) causes a,in inputs or external components](<https://dev.to/tawseef/require-vs-assert-in-solidity-5e9d#:~:text=assert(bool%20condition)%20causes%20a,in%20inputs%20or%20external%20components>).
+10. External visibility type is not available for state variables.
+11. Modifiers - [Solidity Tutorial : all about Modifiers](https://medium.com/coinmonks/solidity-tutorial-all-about-modifiers-a86cf81c14cb)
+12. Events - [Learn Solidity lesson 27. Events.](https://medium.com/coinmonks/learn-solidity-lesson-27-events-f47070b55851)
     - What r indexed values & their usage ?
     - Max indexed values in event - 3
     - What r anonymous events ?
     - Max indexed values in anon events - 4
-12. Where r event logs stored - [Where do contract event logs get stored in the Ethereum architecture?](https://ethereum.stackexchange.com/questions/1302/where-do-contract-event-logs-get-stored-in-the-ethereum-architecture)
-13. Fallback and Receive & Related Security - [Understanding Security of Fallback & Recieve Function in Solidity](https://blog.solidityscan.com/understanding-security-of-fallback-recieve-function-in-solidity-9d18c8cad337)
-14. Usecase for Unchecked - [Solidity tips and tricks #1: Unchecked arithmetic trick](https://medium.com/@ashwin.yar/solidity-tips-and-tricks-1-unchecked-arithmetic-trick-cefa18792f0b)
-15. Pure and view functions do not cost when called externally. But they do cost when called internally.
-16. By default storage variables are internal.
-17. Assignment btw diff data locations types.
+13. Where r event logs stored - [Where do contract event logs get stored in the Ethereum architecture?](https://ethereum.stackexchange.com/questions/1302/where-do-contract-event-logs-get-stored-in-the-ethereum-architecture)
+14. Fallback and Receive & Related Security - [Understanding Security of Fallback & Recieve Function in Solidity](https://blog.solidityscan.com/understanding-security-of-fallback-recieve-function-in-solidity-9d18c8cad337)
+15. Usecase for Unchecked - [Solidity tips and tricks #1: Unchecked arithmetic trick](https://medium.com/@ashwin.yar/solidity-tips-and-tricks-1-unchecked-arithmetic-trick-cefa18792f0b)
+16. Pure and view functions do not cost when called externally. But they do cost when called internally.
+17. By default storage variables are internal.
+18. Assignment btw diff data locations types.
 
     - Assignments between storage and memory (or from calldata) always create an independent copy.
     - Assignments from memory to memory only create references. As a result changes to one memory variable are also visible in all other memory variables that refer to the same data.
@@ -82,5 +82,3 @@ All the contracts are implemented using `remix`.
 
     - Assignments from storage to a localstorage variable also only assign a reference.
     - All other assignments to storage always creates independent copies.
-
-18.
